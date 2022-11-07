@@ -8,12 +8,11 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import tifffile
-import cv2
 from PIL import ImageColor
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import Pool, Value, Array
 from time import time
-import skimage.segmentation as seg
+
 
 def top_clusters(centroids, n, cluster_id= "cluster_id", sort_val= "nCluster"):
     clusters= centroids[[cluster_id, sort_val]].drop_duplicates()
@@ -40,8 +39,6 @@ def child_process(row):
                   newVal= rgb_color,
                   flags= cv2.FLOODFILL_FIXED_RANGE 
                   )
-        ## This doesn't do the flood fill properly.
-        ## I can either try the scipy segmentation floodfill or the 
    
 
     print("Done with row in ", time() - currtime)

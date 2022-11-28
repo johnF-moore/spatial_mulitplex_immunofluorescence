@@ -13,6 +13,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import Pool, Value, Array
 from time import time
 
+## This script parallelizes OpenCV's floodfill using shared memory and colors a cell segmentation image, according to the cluster identity of that cell
+## The memory has to be shared because the image is too big to re-write multiple times. 
 
 def top_clusters(centroids, n, cluster_id= "cluster_id", sort_val= "nCluster"):
     clusters= centroids[[cluster_id, sort_val]].drop_duplicates()
@@ -41,16 +43,19 @@ def child_process(row):
                   )
    
 
-    print("Done with row in ", time() - currtime)
+    # print("Done with row in ", time() - currtime)
 
 def main():
 
     path= "/stor/work/Ehrlich/Users/John/projects/AKOYA"
+    
+    ## Loading in imaging data and subsetting for region of interest
     data_to_share= cv2.imread(os.path.join(path,"scripts/cell_segmentation/MESMER/data/multichannel_thymus_nuc_CD31_CD49f_MHCII/segmentation/fov1.tiff"))
     centroids= pd.read_csv(os.path.join(path,"data/AKOYA_1mo_XY_supGrant_xshift_clusters.csv"))
     centroids= centroids[(centroids.Y_centroid < 6500)  & (centroids.Y_centroid > 6250) &
                          (centroids.X_centroid < 13050) & (centroids.X_centroid > 12750)] 
     
+    ## Cluster colors 
     hex_colors= ["#1B9E77", "#528B54", "#897932", "#C16610", "#C8611F", "#AB6653",
                  "#8D6B86", "#796DB1", "#9B58A5", "#BC4399", "#DD2E8D", "#CC4373",
                  "#A66753", "#808B34", "#70A61B", "#96A713", "#BBA90B", "#E0AA03",
@@ -72,7 +77,9 @@ def main():
         arr = create_np_array_from_shared_mem()
         arr[:] = data_to_share  # load the data into shared memory
         rgb_colors= [ImageColor.getcolor(color, "RGB") for color in hex_colors]
-
+            
+        ## Find the top clusters in the data.
+        ## This becomes relevant when overclustering to find rare cell types. 
         clusters= top_clusters(centroids= centroids, n= 20)
     
         

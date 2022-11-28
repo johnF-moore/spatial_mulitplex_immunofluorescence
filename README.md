@@ -1,5 +1,5 @@
 # spatial_mulitplex_immunofluorescence
-
+**Spatial multiplex immunofluorescence data from thymic slices. Tissues are stained with phenocycler (CODEX) workflow. The goal is to understand how aging affects thymic tissue.**
 
 - *AKOYA_clustering_comparison_functions.R* contains the functions that I use to automate the downstream analysis of spatial multiplex immunofluorescence clustering 
 

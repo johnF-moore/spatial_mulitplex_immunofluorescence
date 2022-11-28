@@ -49,16 +49,17 @@ cluster_info= function(df){
 
 
 fcs.df_to_seurat= function(df, col_index, scale_factor, assay= "CODEX"){
+  ## Takes data.frame output from fcs_to_df() and makes a Seurat object 
   rownames(df)= paste0("bar.", rownames(df))
   df_md= df[,(col_index+1):ncol(df), drop= FALSE]
   seurat_data <- as.matrix(df[,1:col_index])
-  seurat_data <- asinh(seurat_data/scale_factor)
-  seurat_data <- asinh(t(seurat_data)/scale_factor)
+  
+  ## Normalization and scaling
   seurat_data <- scale(seurat_data, 
                        center= FALSE,
                        scale = apply(seurat_data, 2, sd, na.rm = TRUE))
-    ## Divides by the sd w/o centering.
-    ## X-shift clustering does this.
+  seurat_data <- asinh(seurat_data/scale_factor)
+
 
   
   obj= CreateSeuratObject(counts    = seurat_data,
@@ -76,6 +77,7 @@ fcs.df_to_seurat= function(df, col_index, scale_factor, assay= "CODEX"){
 
 
 seurat_figs_wrapper= function(obj, nClusters){
+  ## Wrapper function to make the preliminary figures that I use to assess the success of the spatial multiplex clustering 
   fig.list= vector(mode= "list", length= 8)
   names(fig.list)= c("obj", "UMAP","facet_UMAP", "feat_UMAPs",
                      "dotplot","cluster_data","spatial_clusters","facet_spatial")
@@ -95,6 +97,7 @@ seurat_figs_wrapper= function(obj, nClusters){
   my_colors["167"] <- "purple"
   my_colors["86"] <- "cyan"
   my_colors["110"] <- "white"
+    ## Adding specific colors for some cell types 
     ## Neither of these colors are in the palette already
     ##  any(col2hcl(col= c("cyan","purple")) %in% my_colors)
   
@@ -129,6 +132,7 @@ seurat_figs_wrapper= function(obj, nClusters){
 
 fcs_seurat_pipeline= function(path=NULL, df= NULL, col_index, nClusters, downsample,
                               scale_factor= 5){
+  ## This function goes from data.frame to fcs to seurat to preliminary figures 
   if(is.null(df) && is.null(path)){
     stop("df and path cannot both be NULL. One must be set")
   } else if(!is.null(df) && !is.null(path)){
